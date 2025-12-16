@@ -57,3 +57,19 @@ void vga_set_palette(uint8_t index, uint8_t r, uint8_t g, uint8_t b)
     outb(0x3C9, g >> 2);
     outb(0x3C9, b >> 2);
 }
+
+void vga_fill_rect(int x, int y, int width, int height, uint8_t color)
+{
+    for (int dy = 0; dy < height; dy++)
+    {
+        for (int dx = 0; dx < width; dx++)
+        {
+            int px = x + dx;
+            int py = y + dy;
+            if (px >= 0 && px < 320 && py >= 0 && py < 200)
+            {
+                vga_set_pixel(px, py, color);
+            }
+        }
+    }
+}

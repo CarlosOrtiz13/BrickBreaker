@@ -24,4 +24,6 @@ void vga_draw_frame(uint8_t* framebuffer);
 // ADDED: Set VGA palette entry
 void vga_set_palette(uint8_t index, uint8_t r, uint8_t g, uint8_t b);
 
+void vga_fill_rect(int x, int y, int width, int height, uint8_t color);
+
 #endif

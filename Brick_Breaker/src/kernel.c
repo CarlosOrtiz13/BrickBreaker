@@ -15,10 +15,9 @@
 #include "status.h"
 #include "timer/timer.h"  // ADDED: Timer functions
 #include "keyboard/keyboard.h"  // ADDED
-#include "keyboard/doomkeys.h" // ADDED
 #include "graphics/vga.h" // ADDED
-#include "doomgeneric/Doom_UserFiles/doomgeneric.h"  // ADDED
 #include "breakout/breakout.h"
+#include "breakout/breakout_menu.h"
 
 uint16_t* video_mem = 0;
 uint16_t terminal_row = 0;
@@ -207,11 +206,22 @@ void kernel_main()
     // ADDED: Initialize VGA (already in mode 13h from boot)
     vga_init();
 
-    breakout_init(2);  // 1 player
+    int num_players = menu_run();
+
+    if (num_players == 0){
+        vga_clear(0);
+
+        while(1) {}
+    }
+
+    breakout_init(num_players);
 
     breakout_run();
-    
-    // Final: black screen
+
+    // ------------------------------------------------------------------------
+    // 4. GAME ENDED
+    // ------------------------------------------------------------------------
+    // User pressed ESC, game loop exited
     vga_clear(0);
     
     while(1) {}

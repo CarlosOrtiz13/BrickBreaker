@@ -7,12 +7,17 @@ FILES = ./build/kernel.asm.o ./build/kernel.o \
 		./build/libc/ctype.o ./build/stdio/stdio_impl.o \
 		./build/stdio/stdio.o ./build/stdlib/stdlib.o \
         ./build/io/io.asm.o ./build/graphics/vga.o \
-        ./build/gdt/gdt.o ./build/gdt/gdt.asm.o ./build/breakout/breakout.o \
+        ./build/gdt/gdt.o ./build/gdt/gdt.asm.o \
         ./build/memory/heap/heap.o ./build/memory/heap/kheap.o \
         ./build/memory/paging/paging.o ./build/memory/paging/paging.asm.o ./build/errno.o \
-
-# # ADDED: Doom object files
-# DOOM_OBJS = ./build/doomgeneric/*.o
+		./build/breakout/breakout_audio.o \
+		./build/breakout/breakout_graphics.o \
+		./build/breakout/breakout_main.o \
+		./build/breakout/breakout_menu.o \
+		./build/breakout/breakout_particles.o \
+		./build/breakout/breakout_physics.o \
+		./build/breakout/breakout_powerups.o \
+		./build/breakout/breakout_ui.o
 
 INCLUDES = -I./src -I./src/stdlib -I./src/stdio -I./src/string
 FLAGS = -g -ffreestanding -falign-jumps -falign-functions -falign-labels -falign-loops \
@@ -29,19 +34,8 @@ all: ./bin/boot.bin ./bin/kernel.bin
 	truncate -s 128M ./bin/os.bin
 	dd if=./bin/boot.bin   of=./bin/os.bin bs=512 conv=notrunc
 	dd if=./bin/kernel.bin of=./bin/os.bin bs=512 seek=1 conv=notrunc
-# 	python3 -c 'import os,subprocess,math; \
-# 	kbytes=os.path.getsize("./bin/kernel.bin"); \
-# 	ksecs=(kbytes+511)//512; \
-# 	wad_lba=1+ksecs; \
-# 	print("KERNEL_BYTES =",kbytes); \
-# 	print("KERNEL_SECTORS =",ksecs); \
-# 	print("WAD_LBA =",wad_lba); \
-# 	subprocess.check_call(["dd","if=src/doomgeneric/Doom_UserFiles/doom1.wad","of=./bin/os.bin","bs=512",f"seek={wad_lba}","conv=notrunc"])'
 
 ./bin/kernel.bin: $(FILES)
-# ADDED: Build Doom first
-# 	./src/doomgeneric/build_doom.sh
-# 	# Link everything including Doom
 	i686-elf-ld -g -relocatable $(FILES) -o ./build/kernelfull.o
 	i686-elf-gcc $(FLAGS) -T ./src/linker.ld -o ./bin/kernel.bin -ffreestanding -O0 -nostdlib ./build/kernelfull.o
 
@@ -128,9 +122,9 @@ all: ./bin/boot.bin ./bin/kernel.bin
 ./build/stdlib/stdlib.o: ./src/stdlib/stdlib.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/stdlib/stdlib.c -o ./build/stdlib/stdlib.o
 
-./build/breakout/breakout.o: ./src/breakout/breakout.c
-	i686-elf-gcc $(INCLUDES) -I./src/breakout $(FLAGS) -std=gnu99 -c ./src/breakout/breakout.c -o ./build/breakout/breakout.o
-
+./build/breakout/%.o: ./src/breakout/%.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c $< -o $@
+	
 clean:
 	rm -rf ./bin/boot.bin
 	rm -rf ./bin/kernel.bin
